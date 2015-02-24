@@ -1,6 +1,6 @@
 # tabular
-Display a map in a tabular fashion. Think console.table() in javascript (but this one's for golang and in the  
-system console)
+Display a map in a tabular fashion. Think console.table() in javascript (but this one's for golang and  
+in the system console)
 
 To import the library - 
 ```golang
