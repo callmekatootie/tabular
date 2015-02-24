@@ -1,48 +1,97 @@
 package tabular
 
 import (
-    "fmt"
-    "errors"
+	"errors"
+	"fmt"
 )
 
 /*
-    Public function taht expects a slice of maps as argument when called along
-    with the width of the columns of the generated table
-    Assumptions (TODO later rather)
-    1. widths will contain width of all columns. No checks carried out here
-    2. keys of the map will be used as the columns. Each map will have all the keys
-        No checks carried out here.
-    3. All keys will be used. Need to provide parameter to specify which keys to be used
-        as columns
+   Prints the row divider (--------)
 */
-func Display(data []interface{}, widths []int) error {
-    //Calculate the width of the table
-    //Start with 1 to account for the leftmost column's left side
-    width := 1
+func printDivider(width int) {
+	for j := 0; j < width; j++ {
+		fmt.Print("-")
+	}
+	fmt.Println()
+}
 
-    for _, w := range widths {
-        if width + w > 255 {
-            return errors.New("Width of the table exceeds 255. Cannot display table with such a large width")
-        }
-        width += w
-    }
+/*
+   Given a string and a width, this function prints spaces for
+   the remaining width not occupied by the string
+*/
+func printRemainingWidth(width int, value string) {
+	//Determine the remaining width
+	rem := width - len(value)
+	for j := 0; j < rem; j++ {
+		fmt.Print(" ")
+	}
+}
 
-    //Start displaying the table
-    //First display the header rows
-    //Start with the display of the top of the header row
-    for j := 0; j < width; j++ {
-        fmt.Print("-")
-    }
+/*
+   Public function taht expects a slice of maps as argument when called along
+   with the width of the columns of the generated table
+*/
+func Display(data []map[string]string, widths []int) error {
+	//Calculate the width of the table
+	//Each cell will have a space to its left and right (within the cell)
+	//Also, each cell will have a wall to its left and right
+	width := (len(widths) + 1) + (2 * len(widths))
 
-    //Move to the next line
-    fmt.Println()
+	//Add the width of the column headers itself
+	for _, w := range widths {
+		if width+w > 255 {
+			return errors.New("Width of the table exceeds 255. Cannot display table with such a large width")
+		}
+		width += w
+	}
 
-    //Print the beginning of the first column
-    fmt.Print("|")
+	//Start displaying the table
 
-    //Now print the column headers
-    //Use the first map's key - assume that it contains all the key columns
-    for key, _ := range data[0] {
-        fmt.Print(key, "|")
-    }
+	//First display the header rows
+	//Start with the display of the top of the header row
+	printDivider(width)
+
+	//Print the beginning of the first column
+	fmt.Print("|")
+
+	//Now print the column headers
+	//Use the first map's keys - assume that it contains all the key columns
+
+	//Keep track of the number of keys
+	i := 0
+	for key, _ := range data[0] {
+		//Print the key seperated by a space to the left
+		fmt.Print(" ", key)
+		//Fill the remaining width (for the width of the column provided) with spaces
+		printRemainingWidth(widths[i], key)
+		//Print the column seperator with a space
+		fmt.Print(" |")
+
+		i++
+	}
+
+	//Move to the table data
+	//Here we being printing the contents of each row
+	fmt.Println()
+
+	printDivider(width)
+
+	for _, row := range data {
+		//Print the column beginning
+		fmt.Print("|")
+		//Track the column number
+		i = 0
+		for _, value := range row {
+			fmt.Print(" ", value)
+			printRemainingWidth(widths[i], value)
+			fmt.Print(" |")
+			i++
+		}
+		//Move to the next row
+		fmt.Println()
+		//Print a divider
+		printDivider(width)
+	}
+
+	return nil
 }
